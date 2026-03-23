@@ -107,7 +107,7 @@ Upload a resume PDF and receive an AI analysis against a job description.
 }
 ```
 
-### GET `/`
+### GET `/health`
 
 Health check endpoint.
 
@@ -115,7 +115,7 @@ Health check endpoint.
 
 ```json
 {
-  "Hello": "World"
+  "status": "OK"
 }
 ```
 

@@ -84,7 +84,7 @@ poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
 
 ### Health Check
 
-**GET** `/`
+**GET** `/health`
 
 Simple health check endpoint.
 
@@ -92,7 +92,7 @@ Simple health check endpoint.
 
 ```json
 {
-  "Hello": "World"
+  "status": "OK"
 }
 ```
 

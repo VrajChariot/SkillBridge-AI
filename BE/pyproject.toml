@@ -3,7 +3,7 @@ name = "be"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Vraj Shah",email = "Cd4617@corp.transmission-it.de"}
+    {name = "Vraj Shah",email = "vraj0410shah@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12,<4.0"

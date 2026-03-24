@@ -1,6 +1,7 @@
 from io import BytesIO
 
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 from google import genai
@@ -14,6 +15,15 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI()
 
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/health")
 def read_root():
@@ -21,7 +31,7 @@ def read_root():
 
 
 @app.post("/upload")
-async def upload_file(file: UploadFile, job_description: str):
+async def upload_file(file: UploadFile, job_description: str = Form(...)):
     file_bytes = await file.read()
     source = DocumentStream(
         name=file.filename or "uploaded_document.pdf",

@@ -126,7 +126,7 @@ Health check endpoint.
 - **Framework**: FastAPI
 - **Server**: Uvicorn
 - **AI/ML**: Google Gemini 3 Flash API
-- **Document Processing**: Docling (PDF extraction)
+- **Document Processing**: pypdf and python-docx
 - **Environment Management**: Python-dotenv
 
 ## Development Guidelines

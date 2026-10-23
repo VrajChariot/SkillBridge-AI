@@ -1,7 +1,7 @@
 from io import BytesIO
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, HTTPException, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
@@ -9,9 +9,9 @@ from google import genai
 from google.genai import types
 from google.genai.types import ThinkingLevel 
 
-from docling.document_converter import DocumentConverter
-from docling_core.types.io import DocumentStream
 from dotenv import load_dotenv
+from docx import Document
+from pypdf import PdfReader
 
 load_dotenv()
 app = FastAPI()
@@ -41,13 +41,30 @@ def read_root():
 @app.post("/api/upload")
 async def upload_file(file: UploadFile, job_description: str = Form(...)):
     file_bytes = await file.read()
-    source = DocumentStream(
-        name=file.filename or "uploaded_document.pdf",
-        stream=BytesIO(file_bytes),
+    resume_text = extract_resume_text(file.filename, file.content_type, file_bytes)
+    return AI_resume_parsing(resume_text, job_description)
+
+
+def extract_resume_text(
+    filename: str | None, content_type: str | None, file_bytes: bytes
+) -> str:
+    filename = (filename or "").lower()
+    if content_type == "application/pdf" or filename.endswith(".pdf"):
+        reader = PdfReader(BytesIO(file_bytes))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+    if (
+        content_type
+        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        or filename.endswith(".docx")
+    ):
+        document = Document(BytesIO(file_bytes))
+        return "\n".join(paragraph.text for paragraph in document.paragraphs)
+
+    raise HTTPException(
+        status_code=415,
+        detail="Only PDF and DOCX resume files are supported.",
     )
-    converter = DocumentConverter()
-    result = converter.convert(source)
-    return AI_resume_parsing(result.document.export_to_markdown(), job_description)
 
 def AI_resume_parsing(resume_query: str, job_description: str):
 

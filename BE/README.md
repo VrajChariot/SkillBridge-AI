@@ -27,7 +27,7 @@ The backend service is a FastAPI application that provides intelligent resume pa
 | Server              | Uvicorn                |
 | Python              | 3.12+                  |
 | AI Model            | Google Gemini 3 Flash  |
-| Document Processing | Docling                |
+| Document Processing | pypdf and python-docx |
 | Environment         | Poetry + Python-dotenv |
 
 ## Installation
@@ -208,7 +208,8 @@ Key dependencies:
 - `fastapi` - Web framework
 - `uvicorn` - ASGI server
 - `google-genai` - Google Gemini API client
-- `docling` - PDF document extraction
+- `pypdf` - PDF text extraction
+- `python-docx` - DOCX text extraction
 - `python-dotenv` - Environment variable management
 - `python-multipart` - File upload support
 

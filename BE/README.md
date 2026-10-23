@@ -54,9 +54,22 @@ Create a `.env` file in the BE directory:
 
 ```env
 GEMINI_API_KEY=your-api-key-here
+CORS_ORIGINS=http://localhost:5173
 ```
 
 Obtain your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+
+`CORS_ORIGINS` is a comma-separated allowlist of browser origins permitted to
+call the API. Keep it limited to the frontend origins you control. For
+example, a separate deployed frontend could use:
+
+```env
+CORS_ORIGINS=http://localhost:5173,https://your-frontend.example.com
+```
+
+When the frontend and backend are served through the same Vercel project
+domain, browser CORS is not required for the `/api` rewrite, so the local
+origin can be removed from the production value.
 
 ## Running the Service
 
@@ -84,7 +97,7 @@ poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
 
 ### Health Check
 
-**GET** `/health`
+**GET** `/api/health`
 
 Simple health check endpoint.
 
@@ -98,7 +111,7 @@ Simple health check endpoint.
 
 ### Upload & Analyze Resume
 
-**POST** `/upload`
+**POST** `/api/upload`
 
 Analyzes a resume against a job description using AI.
 
@@ -110,7 +123,7 @@ Analyzes a resume against a job description using AI.
 **Example Request:**
 
 ```bash
-curl -X POST "http://localhost:8000/upload" \
+curl -X POST "http://localhost:8000/api/upload" \
   -F "file=@resume.pdf" \
   -F "job_description=Senior Python Developer..."
 ```
@@ -175,7 +188,8 @@ curl -X POST "http://localhost:8000/upload" \
 ```
 src/
 ├── main.py                 # FastAPI app, routes, and core logic
-├── __pycache__/           # Python bytecode cache
+prompts/
+└── systemprompt-v1.md      # Versioned Gemini system prompt
 tests/
 ├── __init__.py
 ├── ...                    # Test files (to be added)

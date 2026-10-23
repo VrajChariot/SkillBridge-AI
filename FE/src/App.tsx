@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   UploadForm,
   ScoreOverview,
@@ -106,7 +106,7 @@ function App() {
             <p className="text-sm mt-1">
               Unable to connect to the backend API. Make sure it's running on{" "}
               <code className="bg-red-100 px-1 rounded">
-                http://localhost:8000
+                http://localhost:8000/api
               </code>
             </p>
           </div>

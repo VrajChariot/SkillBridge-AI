@@ -38,7 +38,8 @@ A clean, minimal React + TypeScript + TailwindCSS frontend for the ATS Resume An
    ```bash
    cp .env.example .env
    ```
-   Customize `VITE_API_URL` if your backend is on a different URL.
+   Customize `VITE_API_URL` if your backend is on a different URL. The default
+   `/api` value uses the Vite development proxy and the Vercel service rewrite.
 
 ## Development
 
@@ -135,10 +136,10 @@ Welcome screen with feature preview and mock results.
 
 ## API Integration
 
-The frontend communicates with the backend's `/upload` endpoint:
+The frontend communicates with the backend's `/api/upload` endpoint:
 
 ```typescript
-POST /upload
+POST /api/upload
 Content-Type: multipart/form-data
 
 Body:
@@ -155,7 +156,7 @@ See [src/services/api.ts](src/services/api.ts) for implementation.
 Create a `.env.local` file to override defaults:
 
 ```env
-VITE_API_URL=http://your-backend-url:8000
+VITE_API_URL=/api
 ```
 
 ### TailwindCSS
@@ -200,7 +201,8 @@ cd ../BE
 poetry run uvicorn src.main:app --reload
 ```
 
-The frontend expects it on `http://localhost:8000`.
+The frontend uses the Vite `/api` proxy, which expects the backend on
+`http://localhost:8000`.
 
 ### Port 5173 already in use
 

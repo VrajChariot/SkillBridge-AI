@@ -70,7 +70,7 @@ The API will be available at `http://localhost:8000`.
 
 ## API Endpoints
 
-### POST `/upload`
+### POST `/api/upload`
 
 Upload a resume PDF and receive an AI analysis against a job description.
 
@@ -107,7 +107,7 @@ Upload a resume PDF and receive an AI analysis against a job description.
 }
 ```
 
-### GET `/health`
+### GET `/api/health`
 
 Health check endpoint.
 

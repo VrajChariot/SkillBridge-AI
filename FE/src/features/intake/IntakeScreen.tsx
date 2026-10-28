@@ -41,7 +41,8 @@ export function IntakeScreen({ draft, onDraftChange, state, onSubmit, onCancel }
     const previous = previousPhase.current;
     previousPhase.current = state.phase;
     const message = phaseAnnouncement(previous, state.phase);
-    if (message) setAnnouncement(message);
+    // Clear on silent transitions (e.g. failure, announced by the error notice) so nothing stale lingers.
+    setAnnouncement(message ?? "");
     // Progress just unmounted; put focus back on the action that retries.
     const wasBusy = previous === "uploading" || previous === "analyzing";
     if (wasBusy && !busy) formRef.current?.querySelector<HTMLButtonElement>("[type=submit]")?.focus();

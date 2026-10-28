@@ -44,3 +44,8 @@ htmlcov/
 
 # Poetry lock if not sharing across team
 # poetry.lock
+
+# Local agent skills (installed via skills CLI)
+.agents/
+.claude/
+skills-lock.json

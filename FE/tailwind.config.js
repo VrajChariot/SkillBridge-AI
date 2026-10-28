@@ -58,6 +58,10 @@ export default {
       maxWidth: {
         prose: "68ch",
       },
+      screens: {
+        // Roomier spacing and the largest headline only when the window is tall enough to fit the form.
+        tall: { raw: "(min-height: 820px)" },
+      },
     },
   },
   plugins: [],

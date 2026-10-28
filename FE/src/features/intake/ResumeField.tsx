@@ -140,8 +140,8 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
             </p>
           </div>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-1 py-6 text-center">
-            <FileArrowUp size={40} weight="regular" aria-hidden className="mb-2 text-graphite" />
+          <div className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-center">
+            <FileArrowUp size={36} weight="regular" aria-hidden className="mb-2 text-graphite" />
             <p className="font-medium">
               {dragging ? "Release to add your resume" : "Drop your resume here"}
             </p>
@@ -152,7 +152,7 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
             <label
               id={CHOOSE_ID}
               htmlFor={INPUT_ID}
-              className={`mt-4 inline-flex h-10 items-center justify-center rounded border border-rule-strong bg-sheet px-4 text-sm font-medium text-ink transition-colors hover:border-ink peer-focus:outline peer-focus:outline-2 peer-focus:outline-offset-2 peer-focus:outline-ink ${
+              className={`mt-3 inline-flex h-10 items-center justify-center rounded border border-rule-strong bg-sheet px-4 text-sm font-medium text-ink transition-colors hover:border-ink peer-focus:outline peer-focus:outline-2 peer-focus:outline-offset-2 peer-focus:outline-ink ${
                 disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
               }`}
             >

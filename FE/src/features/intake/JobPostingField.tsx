@@ -54,7 +54,7 @@ export const JobPostingField = forwardRef<HTMLTextAreaElement, JobPostingFieldPr
             aria-describedby={describedBy}
             spellCheck={false}
             placeholder="Paste the whole posting: the role summary, responsibilities, requirements and nice-to-haves."
-            className="min-h-[18rem] flex-1 resize-none bg-transparent px-5 py-3 text-base text-ink placeholder:text-graphite focus-visible:outline-none disabled:text-graphite sm:min-h-[24rem] sm:px-6"
+            className="min-h-[14rem] flex-1 resize-none bg-transparent px-5 py-3 text-base text-ink placeholder:text-graphite focus-visible:outline-none disabled:text-graphite sm:px-6 lg:min-h-[6rem]"
           />
           <div
             id={COUNT_ID}

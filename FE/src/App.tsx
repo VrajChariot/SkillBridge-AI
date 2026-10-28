@@ -29,13 +29,13 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <AppHeader />
       <main
         id="main"
         ref={main}
         tabIndex={-1}
-        className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 outline-none sm:px-8 sm:py-14"
+        className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-6 outline-none sm:px-8 sm:py-8 sm:tall:py-10"
       >
         <ServiceNotice />
         {showReport ? (

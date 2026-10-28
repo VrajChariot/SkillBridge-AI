@@ -82,11 +82,12 @@ export function IntakeScreen({ draft, onDraftChange, state, onSubmit, onCancel }
   };
 
   return (
-    <div className="flex flex-col gap-10 md:gap-12">
+    <div className="flex flex-1 flex-col gap-6 tall:gap-8">
       <IntakeHero />
 
-      <form ref={formRef} noValidate onSubmit={handleSubmit} className="flex flex-col gap-8">
-        <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
+      <form ref={formRef} noValidate onSubmit={handleSubmit} className="flex flex-1 flex-col gap-6">
+        {/* On desktop the two sheets take whatever height is left, so the page fits the viewport. */}
+        <div className="grid flex-1 gap-6 lg:grid-cols-12 lg:gap-8">
           <div className="flex flex-col lg:col-span-7">
             <JobPostingField
               ref={postingRef}

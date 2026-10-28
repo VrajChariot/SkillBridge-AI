@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "http://localhost:8000",
+      // Override to run several backends side by side, e.g. API_PROXY_TARGET=http://localhost:8011
+      "/api": process.env.API_PROXY_TARGET ?? "http://localhost:8000",
     },
   },
   test: {

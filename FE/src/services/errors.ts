@@ -9,6 +9,7 @@ export type ErrorCode =
   | "unsupported_file_type"
   | "resume_unreadable"
   | "job_description_missing"
+  | "job_description_too_long"
   | "analysis_failed"
   | "service_unavailable"
   | "unknown";
@@ -18,6 +19,7 @@ const BACKEND_CODES = new Set<ErrorCode>([
   "unsupported_file_type",
   "resume_unreadable",
   "job_description_missing",
+  "job_description_too_long",
   "analysis_failed",
   "service_unavailable",
 ]);
@@ -96,6 +98,10 @@ const COPY: Record<ErrorCode, ErrorCopy> = {
   job_description_missing: {
     title: "The job posting is empty",
     body: "Paste the full posting, including responsibilities and requirements.",
+  },
+  job_description_too_long: {
+    title: "The job posting is over 20,000 characters",
+    body: "Paste only the role description, responsibilities and requirements.",
   },
   analysis_failed: {
     title: "The analysis didn't finish",

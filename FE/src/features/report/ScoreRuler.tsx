@@ -20,6 +20,8 @@ export function ScoreRuler({ current, projected }: ScoreRulerProps) {
     gain > 0
       ? `Match score ${now} out of 100. About ${after} after the suggested edits.`
       : `Match score ${now} out of 100. No further gain expected from edits.`;
+  // "Now" label (3rem) sits left of its pin; leave room for the "After edits" label (6rem) on its right.
+  const nowLeft = `max(0rem, min(calc(${now}% - 3.5rem), calc(100% - ${gain > 0 ? 9.75 : 3}rem)))`;
 
   return (
     <div className={`${scaleGrid} items-end gap-y-4`}>
@@ -36,12 +38,19 @@ export function ScoreRuler({ current, projected }: ScoreRulerProps) {
         )}
       </p>
 
-      <div role="img" aria-label={label} className="relative col-span-2 h-36 sm:col-span-1">
-        {/* Marker labels sit above the track; "now" opens left, "after" opens right so they never collide. */}
-        <RulerPin value={now} anchor={now < 22 ? "start" : "end"} caption="Now" filled />
+      <div role="img" aria-label={label} className="relative h-36">
+        {/* Labels sit in their own band above the pins, clamped so they never overlap or leave the track. */}
+        <RulerLabel caption="Now" value={now} left={nowLeft} width="w-12" filled />
         {gain > 0 && (
-          <RulerPin value={after} anchor={after > 78 ? "end" : "start"} caption="After edits" />
+          <RulerLabel
+            caption="After edits"
+            value={after}
+            left={`max(calc(${nowLeft} + 3.75rem), min(calc(${after}% + 0.5rem), calc(100% - 6rem)))`}
+            width="w-24"
+          />
         )}
+        <RulerPin value={now} filled />
+        {gain > 0 && <RulerPin value={after} />}
 
         {gain > 0 && (
           <div
@@ -72,30 +81,37 @@ export function ScoreRuler({ current, projected }: ScoreRulerProps) {
   );
 }
 
-interface RulerPinProps {
-  value: number;
-  anchor: "start" | "end";
+interface RulerLabelProps {
   caption: string;
+  value: number;
+  /** CSS `left` expression. */
+  left: string;
+  width: string;
   filled?: boolean;
 }
 
-function RulerPin({ value, anchor, caption, filled = false }: RulerPinProps) {
+function RulerLabel({ caption, value, left, width, filled = false }: RulerLabelProps) {
+  return (
+    <div
+      aria-hidden
+      className={`absolute top-0 whitespace-nowrap ${width} ${filled ? "text-right" : ""}`}
+      style={{ left }}
+    >
+      <span className="block text-sm text-graphite">{caption}</span>
+      <span
+        className={`tabular block text-2xl font-semibold ${filled ? "text-ink" : "text-graphite"}`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function RulerPin({ value, filled = false }: { value: number; filled?: boolean }) {
   const style = { "--to": `${value}%`, left: `${value}%` } as CSSProperties;
   return (
-    <div aria-hidden className="report-pin absolute top-0 z-10 h-24 w-0" style={style}>
-      <span
-        className={`absolute top-0 whitespace-nowrap ${
-          anchor === "end" ? "right-3 text-right" : "left-3"
-        }`}
-      >
-        <span className="block text-sm text-graphite">{caption}</span>
-        <span
-          className={`tabular block text-2xl font-semibold ${filled ? "text-ink" : "text-graphite"}`}
-        >
-          {value}
-        </span>
-      </span>
-      <span className="absolute bottom-0 left-0 top-1 w-px -translate-x-1/2 bg-ink" />
+    <div aria-hidden className="report-pin absolute top-16 z-10 h-8 w-0" style={style}>
+      <span className="absolute inset-y-0 left-0 w-px -translate-x-1/2 bg-ink" />
       <span
         className={`absolute -bottom-2 left-0 size-4 -translate-x-1/2 rounded-full border-2 border-ink ${
           filled ? "bg-ink" : "bg-sheet"

@@ -118,7 +118,7 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
         onDrop={handleDrop}
         className={`flex flex-1 flex-col gap-4 rounded-lg border px-5 pb-5 pt-4 sm:px-6 sm:pt-5 ${
           dragging
-            ? "border-dashed border-ink bg-paper"
+            ? "border-transparent bg-paper outline-dashed outline-2 outline-offset-[-1px] outline-ink"
             : `bg-sheet ${error ? "border-correction" : "border-rule"}`
         }`}
       >

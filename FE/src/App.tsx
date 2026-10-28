@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   UploadForm,
   ScoreOverview,
@@ -11,7 +11,9 @@ import {
   EmptyState,
 } from "./components";
 import { ATSAnalysisResponse, AnalysisState } from "./types/ats";
-import { checkHealth } from "./services/api";
+import { AppFooter } from "./app/AppFooter";
+import { AppHeader } from "./app/AppHeader";
+import { ServiceNotice } from "./app/ServiceNotice";
 
 function App() {
   const [analysis, setAnalysis] = useState<AnalysisState>({
@@ -20,17 +22,6 @@ function App() {
     data: null,
     fileName: null,
   });
-
-  const [connectionError, setConnectionError] = useState(false);
-
-  useEffect(() => {
-    // Check if backend is available
-    checkHealth().then((healthy) => {
-      if (!healthy) {
-        setConnectionError(true);
-      }
-    });
-  }, []);
 
   const handleAnalysisComplete = (
     data: ATSAnalysisResponse,
@@ -65,52 +56,24 @@ function App() {
       data: null,
       fileName: null,
     });
-    setConnectionError(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-primary-600 flex items-center gap-2">
-              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                <path
-                  fillRule="evenodd"
-                  d="M4 5a2 2 0 012-2 1 1 0 000 2H9V3a3 3 0 013 3v4a3 3 0 01-3 3H6a3 3 0 01-3-3V5zm12.6 9.6a1 1 0 00-1.4-1.4A4 4 0 0014 16v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2a4 4 0 00-4-4h2a1 1 0 100-2H2a3 3 0 00-3 3v4a3 3 0 003 3h4a3 3 0 003-3v-4a4 4 0 013.6-3.9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              SkillBridge AI
-            </h1>
-            {analysis.data && (
-              <button
-                onClick={handleReset}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                ← Analyze Another
-              </button>
-            )}
-          </div>
-        </div>
-      </nav>
+    <div className="flex min-h-screen flex-col">
+      <AppHeader
+        actions={
+          analysis.data && (
+            <button onClick={handleReset} className="text-sm font-medium">
+              Analyze another
+            </button>
+          )
+        }
+      />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Connection Error Alert */}
-        {connectionError && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-            <p className="font-semibold">⚠️ Backend Connection Error</p>
-            <p className="text-sm mt-1">
-              Unable to connect to the backend API. Make sure it's running on{" "}
-              <code className="bg-red-100 px-1 rounded">
-                http://localhost:8000/api
-              </code>
-            </p>
-          </div>
-        )}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
+        <div className="mb-8">
+          <ServiceNotice />
+        </div>
 
         {/* Error Alert */}
         {analysis.error && (
@@ -193,18 +156,7 @@ function App() {
           </div>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <p className="text-gray-600 text-sm">
-            Made with ❤️ and ☕ by <span className="font-semibold">Vraj</span>
-          </p>
-          <p className="text-gray-500 text-xs mt-2">
-            SkillBridge AI • Powered by Google Gemini
-          </p>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

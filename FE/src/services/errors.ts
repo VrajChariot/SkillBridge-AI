@@ -116,8 +116,8 @@ const COPY: Record<ErrorCode, ErrorCopy> = {
     body: "The AI returned an incomplete report. Compare again; it usually works on the next try.",
   },
   service_unavailable: {
-    title: "SkillBridge is temporarily unavailable",
-    body: "The analysis service is down. Try again in a few minutes.",
+    title: "Can't reach the analysis service",
+    body: "It's down or restarting. Your posting and resume are still here; try again in a few minutes.",
   },
   unknown: {
     title: "Something went wrong",

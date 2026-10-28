@@ -27,3 +27,29 @@
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
+
+@media print {
+  .report-sheet {
+    border: 0;
+  }
+
+  .report-columns {
+    display: block;
+  }
+
+  .report-side {
+    position: static;
+    margin-top: 2.5rem;
+  }
+
+  .report-edit,
+  .report-side section,
+  .report-scores {
+    break-inside: avoid;
+  }
+
+  .report-pin,
+  .report-swipe {
+    animation: none;
+  }
+}

@@ -23,10 +23,3 @@ export interface ATSAnalysisResponse {
   ats_compatibility_tips: string[];
   summary: string;
 }
-
-export interface AnalysisState {
-  loading: boolean;
-  error: string | null;
-  data: ATSAnalysisResponse | null;
-  fileName: string | null;
-}

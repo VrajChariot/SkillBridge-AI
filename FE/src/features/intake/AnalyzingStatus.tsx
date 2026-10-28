@@ -9,7 +9,7 @@ export function AnalyzingStatus({ startedAt }: { startedAt: number }) {
     <div className="flex flex-col gap-3">
       <p className="flex items-baseline justify-between gap-4 font-medium">
         Reading your resume against the posting
-        <span className="tabular shrink-0 text-graphite">
+        <span className="shrink-0 text-graphite">
           <span className="sr-only">Elapsed time </span>
           {formatElapsed(seconds)}
         </span>

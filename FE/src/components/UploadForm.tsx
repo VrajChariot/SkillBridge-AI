@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { uploadAndAnalyzeResume } from "../services/api";
+import { analyzeResume } from "../services/api";
 import { ATSAnalysisResponse } from "../types/ats";
 
 interface UploadFormProps {
@@ -54,7 +54,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({
     try {
       onLoading(true);
       onError(null);
-      const result = await uploadAndAnalyzeResume(file, jobDescription);
+      const result = await analyzeResume(file, jobDescription);
       onAnalysisComplete(result, file.name);
     } catch (err) {
       const errorMessage =

@@ -1,22 +1,27 @@
-from io import BytesIO
-from pathlib import Path
-
-from fastapi import FastAPI, HTTPException, UploadFile, Form
-from fastapi.middleware.cors import CORSMiddleware
-import json
 import os
-from google import genai
-from google.genai import types
-from google.genai.types import ThinkingLevel 
+from typing import Any
 
 from dotenv import load_dotenv
-from docx import Document
-from pypdf import PdfReader
+from fastapi import FastAPI, Form, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+
+from src.analysis import analyze_resume
+from src.errors import (
+    MISSING_JOB_DESCRIPTION_DETAIL,
+    AppError,
+    ErrorCode,
+    register_error_handlers,
+)
+from src.extraction import extract_resume_text
+from src.schemas import AtsReport
 
 load_dotenv()
+
+MAX_RESUME_BYTES = 10 * 1024 * 1024
+MAX_JOB_DESCRIPTION_CHARS = 20_000
+
 app = FastAPI()
-SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "systemprompt-v1.md"
-SYSTEM_PROMPT = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
+register_error_handlers(app)
 
 allowed_origins = [
     origin.strip()
@@ -38,82 +43,38 @@ def read_root():
     return {"status": "OK"}
 
 
-@app.post("/api/upload")
-async def upload_file(file: UploadFile, job_description: str = Form(...)):
-    file_bytes = await file.read()
-    resume_text = extract_resume_text(file.filename, file.content_type, file_bytes)
-    return AI_resume_parsing(resume_text, job_description)
+# Sync handler: FastAPI runs it in a worker thread, so the slow Gemini call
+# and PDF parsing never block the event loop.
+@app.post("/api/upload", response_model=AtsReport)
+def upload_file(file: UploadFile, job_description: str = Form(...)) -> dict[str, Any]:
+    resume_bytes = _read_resume(file)
+    posting = _validate_job_description(job_description)
+    resume_text = extract_resume_text(file.filename, file.content_type, resume_bytes)
+    return analyze_resume(resume_text, posting).model_dump()
 
 
-def extract_resume_text(
-    filename: str | None, content_type: str | None, file_bytes: bytes
-) -> str:
-    filename = (filename or "").lower()
-    if content_type == "application/pdf" or filename.endswith(".pdf"):
-        reader = PdfReader(BytesIO(file_bytes))
-        return "\n".join(page.extract_text() or "" for page in reader.pages)
+def _read_resume(file: UploadFile) -> bytes:
+    data = file.file.read(MAX_RESUME_BYTES + 1)
+    if len(data) > MAX_RESUME_BYTES:
+        raise AppError(
+            ErrorCode.FILE_TOO_LARGE,
+            413,
+            "The resume is larger than 10 MB. Export a smaller PDF or DOCX and try again.",
+        )
+    return data
 
-    if (
-        content_type
-        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        or filename.endswith(".docx")
-    ):
-        document = Document(BytesIO(file_bytes))
-        return "\n".join(paragraph.text for paragraph in document.paragraphs)
 
-    raise HTTPException(
-        status_code=415,
-        detail="Only PDF and DOCX resume files are supported.",
-    )
-
-def AI_resume_parsing(resume_query: str, job_description: str):
-
-    user_message = f"""Analyze the following resume against the job description.
-
-    <resume>
-    {resume_query}
-    </resume>
-
-    <job_description>
-    {job_description}
-    </job_description>
-
-    Return your analysis as a single raw JSON object following the schema exactly."""
-
-    client = genai.Client(
-        api_key=os.environ.get("GEMINI_API_KEY"),
-    )
-
-    contents = [
-        types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=user_message)],
-        ),
-    ]
-
-    generate_content_config = types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
-        thinking_config=types.ThinkingConfig(
-            thinking_level=ThinkingLevel.HIGH,                # deep reasoning for better analysis
-        ),
-        response_mime_type="application/json",    # ← forces JSON output natively
-    )
-
-    # Collect the streamed chunks into a single string
-    raw_output = ""
-    for chunk in client.models.generate_content_stream(
-        model="gemini-3-flash-preview",         # use gemini-3 
-        contents=user_message,
-        config=generate_content_config,
-    ):
-        if chunk.text:
-            raw_output += chunk.text
-
-    # Safety net: strip accidental markdown fences
-    cleaned = raw_output.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.strip("`").strip()
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:].strip()
-
-    return json.loads(cleaned)
+def _validate_job_description(job_description: str) -> str:
+    posting = job_description.strip()
+    if not posting:
+        raise AppError(
+            ErrorCode.JOB_DESCRIPTION_MISSING, 422, MISSING_JOB_DESCRIPTION_DETAIL
+        )
+    if len(posting) > MAX_JOB_DESCRIPTION_CHARS:
+        raise AppError(
+            ErrorCode.JOB_DESCRIPTION_TOO_LONG,
+            422,
+            "The job posting is longer than 20,000 characters. "
+            "Remove the parts unrelated to the role and try again.",
+        )
+    return posting

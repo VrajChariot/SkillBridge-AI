@@ -8,7 +8,7 @@ The backend service is a FastAPI application that provides intelligent resume pa
 
 ## Features
 
-- ✅ **PDF Resume Upload**: Direct PDF file upload with automatic text extraction
+- ✅ **PDF and DOCX Resume Upload**: Up to 10 MB, with automatic text extraction
 - ✅ **AI Resume Analysis**: Uses Google Gemini 3 Flash with deep reasoning capabilities
 - ✅ **Comprehensive Scoring**: Multi-dimensional analysis including:
   - Overall match score (0-100)
@@ -117,8 +117,8 @@ Analyzes a resume against a job description using AI.
 
 **Parameters:**
 
-- `file` (form-data, required): PDF resume file
-- `job_description` (string, required): Job description text
+- `file` (form-data, required): PDF or DOCX resume, at most 10 MB
+- `job_description` (form-data, required): Job posting text, at most 20,000 characters after trimming whitespace
 
 **Example Request:**
 
@@ -128,7 +128,7 @@ curl -X POST "http://localhost:8000/api/upload" \
   -F "job_description=Senior Python Developer..."
 ```
 
-**Response:**
+**Response:** validated against `src/schemas.py` (mirrors `FE/src/types/ats.ts`). Scores are integers clamped to 0-100, `impact` is one of `high`, `medium`, `low`, and list fields default to `[]`.
 
 ```json
 {
@@ -177,22 +177,39 @@ curl -X POST "http://localhost:8000/api/upload" \
 }
 ```
 
-**Status Codes:**
+**Errors:**
 
-- `200`: Analysis successful
-- `400`: Invalid request (missing file or job description)
-- `500`: Server error
+Every error response has the body `{"detail": "<human readable>", "code": "<code>"}`. The frontend maps `code` to guidance, so treat codes as a stable contract.
+
+| code                       | status | when                                                                       |
+| -------------------------- | ------ | -------------------------------------------------------------------------- |
+| `file_too_large`           | 413    | Resume is larger than 10 MB                                                |
+| `unsupported_file_type`    | 415    | Resume is not PDF or DOCX (by content type or extension)                   |
+| `resume_unreadable`        | 422    | No file attached, empty file, corrupt or password-protected file, or no extractable text |
+| `job_description_missing`  | 422    | `job_description` is missing or only whitespace                            |
+| `job_description_too_long` | 422    | `job_description` is longer than 20,000 characters                         |
+| `analysis_failed`          | 502    | Gemini call failed, or its reply was not valid JSON matching the schema    |
+| `service_unavailable`      | 503    | `GEMINI_API_KEY` is not configured                                         |
+| `unknown`                  | 500    | Unexpected server error (details are logged server-side, never returned)   |
+
+Other HTTP errors (for example 404 on an unknown route) use the same body with code `unknown`.
 
 ## Project Structure
 
 ```
 src/
-├── main.py                 # FastAPI app, routes, and core logic
+├── main.py                 # FastAPI app, CORS, routes, upload limits
+├── errors.py               # Error codes, AppError, JSON exception handlers
+├── schemas.py              # Pydantic response models (AtsReport)
+├── extraction.py           # PDF/DOCX text extraction
+├── analysis.py             # Gemini client, prompt, call, output validation
 prompts/
 └── systemprompt-v1.md      # Versioned Gemini system prompt
 tests/
-├── __init__.py
-├── ...                    # Test files (to be added)
+├── conftest.py             # Fake Gemini client (no network in tests)
+├── documents.py            # In-memory PDF/DOCX fixtures
+├── factories.py            # Sample model report payloads
+├── test_*.py               # Schema, extraction, analysis and API contract tests
 pyproject.toml            # Poetry dependency and project config
 .env                      # Environment variables (local, not in git)
 .gitignore                # Git ignore rules
@@ -235,8 +252,14 @@ poetry add package-name
 
 ### Running Tests
 
+Tests use FastAPI's `TestClient` and a fake Gemini client, so they need no API key and never touch the network.
+
 ```bash
-poetry run pytest tests/ -v
+poetry install --with dev
+poetry run pytest
+
+# Or with an existing virtualenv
+python -m pytest
 ```
 
 ## Troubleshooting
@@ -258,13 +281,14 @@ poetry run pytest tests/ -v
 2. Verify format: `GEMINI_API_KEY=your-key-here` (no quotes)
 3. Restart the development server
 
-### Issue: PDF upload fails
+### Issue: Resume upload fails
 
-**Solution:**
+**Solution:** read the `code` in the error body (see the error table above).
 
-1. Ensure file is a valid PDF
-2. Check file size limits (currently no hard limit, but consider adding)
-3. Verify `python-multipart` is installed: `poetry show | grep multipart`
+1. `unsupported_file_type`: upload a PDF or DOCX
+2. `file_too_large`: the limit is 10 MB
+3. `resume_unreadable`: the file is empty, damaged, password protected, or a scanned image with no text; export a text-based PDF or DOCX
+4. Verify `python-multipart` is installed: `poetry show | grep multipart`
 
 ### Issue: Slow API response
 

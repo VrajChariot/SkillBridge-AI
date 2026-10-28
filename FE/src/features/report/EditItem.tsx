@@ -34,11 +34,13 @@ export function EditItem({ id, edit, done, onToggle }: EditItemProps) {
         >
           {done && <Check size={14} weight="bold" />}
         </span>
-        <span className={`min-w-0 flex-1 ${done ? "opacity-60" : ""}`}>
+        <span className="min-w-0 flex-1">
           <span className="inline-block rounded-sm border border-rule px-1.5 text-xs text-graphite">
             {edit.section}
           </span>
-          <span className="mt-1 block font-semibold">{edit.issue}</span>
+          <span className={`mt-1 block ${done ? "font-medium text-graphite" : "font-semibold"}`}>
+            {edit.issue}
+          </span>
           <span className="mt-0.5 block max-w-prose text-graphite">{edit.suggestion}</span>
         </span>
         {done && <span className="sr-only">Done</span>}

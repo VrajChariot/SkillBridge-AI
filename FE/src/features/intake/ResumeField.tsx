@@ -93,8 +93,24 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
 
   const describedBy = error ? `${ERROR_ID} ${REQUIREMENTS_ID}` : REQUIREMENTS_ID;
 
+  const input = (
+    <input
+      ref={setRefs}
+      id={INPUT_ID}
+      type="file"
+      accept={ACCEPT}
+      disabled={disabled}
+      tabIndex={file ? -1 : undefined}
+      onChange={handleChange}
+      aria-labelledby={file ? HEADING_ID : `${HEADING_ID} ${CHOOSE_ID}`}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy}
+      className="peer sr-only"
+    />
+  );
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-2">
       <div
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -109,23 +125,9 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
         <h2 id={HEADING_ID} className="font-semibold">
           Your resume
         </h2>
-
-        <input
-          ref={setRefs}
-          id={INPUT_ID}
-          type="file"
-          accept={ACCEPT}
-          disabled={disabled}
-          tabIndex={file ? -1 : undefined}
-          onChange={handleChange}
-          aria-labelledby={file ? HEADING_ID : `${HEADING_ID} ${CHOOSE_ID}`}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className="peer sr-only"
-        />
-
         {file ? (
           <div className="flex flex-1 flex-col gap-3">
+            {input}
             <ResumeFileChip
               file={file}
               disabled={disabled}
@@ -137,26 +139,25 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
             </p>
           </div>
         ) : (
-          <>
-            <div className="flex flex-1 flex-col items-center justify-center gap-1 py-6 text-center">
-              <FileArrowUp size={40} weight="regular" aria-hidden className="mb-2 text-graphite" />
-              <p className="font-medium">
-                {dragging ? "Release to add your resume" : "Drop your resume here"}
-              </p>
-              <p id={REQUIREMENTS_ID} className="text-sm text-graphite">
-                PDF or Word (.docx), up to 10 MB
-              </p>
-            </div>
+          <div className="flex flex-1 flex-col items-center justify-center gap-1 py-6 text-center">
+            <FileArrowUp size={40} weight="regular" aria-hidden className="mb-2 text-graphite" />
+            <p className="font-medium">
+              {dragging ? "Release to add your resume" : "Drop your resume here"}
+            </p>
+            <p id={REQUIREMENTS_ID} className="text-sm text-graphite">
+              PDF or Word (.docx), up to 10 MB
+            </p>
+            {input}
             <label
               id={CHOOSE_ID}
               htmlFor={INPUT_ID}
-              className={`inline-flex h-10 items-center justify-center self-center rounded border border-rule-strong bg-sheet px-4 text-sm font-medium text-ink transition-colors hover:border-ink peer-focus:outline peer-focus:outline-2 peer-focus:outline-offset-2 peer-focus:outline-ink ${
+              className={`mt-4 inline-flex h-10 items-center justify-center rounded border border-rule-strong bg-sheet px-4 text-sm font-medium text-ink transition-colors hover:border-ink peer-focus:outline peer-focus:outline-2 peer-focus:outline-offset-2 peer-focus:outline-ink ${
                 disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
               }`}
             >
               Choose file
             </label>
-          </>
+          </div>
         )}
       </div>
       {error && <FieldError id={ERROR_ID} message={error} />}

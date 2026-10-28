@@ -33,7 +33,7 @@ export const JobPostingField = forwardRef<HTMLTextAreaElement, JobPostingFieldPr
       .join(" ");
 
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2">
         <div
           className={`flex flex-1 flex-col rounded-lg border bg-sheet focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink ${
             error ? "border-correction" : "border-rule"
@@ -49,20 +49,21 @@ export const JobPostingField = forwardRef<HTMLTextAreaElement, JobPostingFieldPr
             disabled={disabled}
             onChange={(event) => onChange(event.target.value)}
             onKeyDown={handleKeyDown}
+            aria-keyshortcuts="Meta+Enter Control+Enter"
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy}
             spellCheck={false}
             placeholder="Paste the whole posting: the role summary, responsibilities, requirements and nice-to-haves."
-            className="min-h-[18rem] flex-1 resize-y bg-transparent px-5 py-3 text-base text-ink placeholder:text-graphite focus-visible:outline-none disabled:text-graphite sm:min-h-[24rem] sm:px-6"
+            className="min-h-[18rem] flex-1 resize-none bg-transparent px-5 py-3 text-base text-ink placeholder:text-graphite focus-visible:outline-none disabled:text-graphite sm:min-h-[24rem] sm:px-6"
           />
           <div
             id={COUNT_ID}
             className="flex flex-wrap items-baseline justify-between gap-x-4 border-t border-rule px-5 py-2.5 text-sm text-graphite sm:px-6"
           >
-            <span className="tabular">
+            <span>
               {check.words.toLocaleString("en-US")} {check.words === 1 ? "word" : "words"}
             </span>
-            <span className={`tabular ${check.nearLimit ? "font-medium text-correction" : ""}`}>
+            <span className={check.nearLimit ? "font-medium text-correction" : undefined}>
               {check.characters.toLocaleString("en-US")} of{" "}
               {MAX_POSTING_CHARS.toLocaleString("en-US")} characters
             </span>

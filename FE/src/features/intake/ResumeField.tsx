@@ -9,6 +9,7 @@ import {
 import { FileArrowUp } from "@phosphor-icons/react";
 import { FieldError } from "./FieldError";
 import { ResumeFileChip } from "./ResumeFileChip";
+import { MAX_RESUME_LABEL } from "./limits";
 
 export interface ResumeFieldProps {
   file: File | null;
@@ -145,7 +146,7 @@ export const ResumeField = forwardRef<HTMLInputElement, ResumeFieldProps>(functi
               {dragging ? "Release to add your resume" : "Drop your resume here"}
             </p>
             <p id={REQUIREMENTS_ID} className="text-sm text-graphite">
-              PDF or Word (.docx), up to 10 MB
+              PDF or Word (.docx), up to {MAX_RESUME_LABEL}
             </p>
             {input}
             <label

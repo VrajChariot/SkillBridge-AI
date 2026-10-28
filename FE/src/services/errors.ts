@@ -92,7 +92,7 @@ const COPY: Record<ErrorCode, ErrorCopy> = {
     body: "Nothing was saved. Try again; long resumes and postings take longer.",
   },
   file_too_large: {
-    title: "This resume is over 10 MB",
+    title: "This resume is over 4.5 MB",
     body: "Export it as a smaller PDF (remove embedded images) and add it again.",
   },
   unsupported_file_type: {

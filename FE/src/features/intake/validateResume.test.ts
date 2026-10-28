@@ -9,23 +9,23 @@ function file(name: string, size: number, type = "") {
 }
 
 describe("validateResume", () => {
-  it("accepts a PDF of exactly 10 MB", () => {
+  it("accepts a PDF of exactly 4.5 MB", () => {
     expect(validateResume(file("cv.pdf", MAX_RESUME_BYTES, "application/pdf"))).toEqual({
       ok: true,
       kind: "pdf",
     });
   });
 
-  it("rejects one byte over 10 MB without rounding down to the limit", () => {
+  it("rejects one byte over 4.5 MB without rounding down to the limit", () => {
     expect(validateResume(file("cv.pdf", MAX_RESUME_BYTES + 1, "application/pdf"))).toEqual({
       ok: false,
-      message: "This file is 10.1 MB. The limit is 10 MB.",
+      message: "This file is 4.6 MB. The limit is 4.5 MB.",
     });
   });
 
   it("reports the size of a large file to one decimal", () => {
     const result = validateResume(file("cv.pdf", 12.35 * 1024 * 1024, "application/pdf"));
-    expect(result).toEqual({ ok: false, message: "This file is 12.4 MB. The limit is 10 MB." });
+    expect(result).toEqual({ ok: false, message: "This file is 12.4 MB. The limit is 4.5 MB." });
   });
 
   it("accepts a .docx the browser reports with an empty MIME type", () => {

@@ -1,4 +1,4 @@
-import { MAX_RESUME_BYTES, MEGABYTE } from "./limits";
+import { MAX_RESUME_BYTES, MAX_RESUME_LABEL, MEGABYTE } from "./limits";
 
 export type ResumeKind = "pdf" | "docx";
 
@@ -35,13 +35,13 @@ export function validateResume(file: FileLike): ResumeCheck {
   if (file.size > MAX_RESUME_BYTES) {
     return {
       ok: false,
-      message: `This file is ${overLimitMegabytes(file.size)} MB. The limit is 10 MB.`,
+      message: `This file is ${overLimitMegabytes(file.size)} MB. The limit is ${MAX_RESUME_LABEL}.`,
     };
   }
   return { ok: true, kind };
 }
 
-/** Rounds up so a file just over the limit never reads as "10 MB". */
+/** Rounds up so a file just over the limit never reads as the limit itself. */
 function overLimitMegabytes(bytes: number): string {
   return (Math.ceil((bytes / MEGABYTE) * 10) / 10).toFixed(1);
 }

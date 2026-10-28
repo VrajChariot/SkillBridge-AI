@@ -38,7 +38,7 @@ describe("errorFromResponse", () => {
 describe("describeError", () => {
   it("gives actionable copy for known codes", () => {
     const copy = describeError(new ApiError("file_too_large", "too big", 413));
-    expect(copy.title).toMatch(/10 MB/);
+    expect(copy.title).toMatch(/4\.5 MB/);
   });
 
   it("never exposes raw messages of non-API errors", () => {

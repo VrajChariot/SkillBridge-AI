@@ -25,7 +25,7 @@ describe("validateDraft", () => {
   });
 
   it("blocks on a rejected replacement even when an earlier file is kept", () => {
-    const rejection = "This file is 12.4 MB. The limit is 10 MB.";
+    const rejection = "This file is 12.4 MB. The limit is 4.5 MB.";
     expect(validateDraft({ jobDescription: posting, file: resume }, rejection).resume).toBe(
       rejection,
     );

@@ -1,245 +1,73 @@
-# SkillBridge AI - Frontend
+# SkillBridge frontend
 
-A clean, minimal React + TypeScript + TailwindCSS frontend for the ATS Resume Analyzer.
+React 18 + TypeScript + Vite + Tailwind 3. Compares a resume (PDF/DOCX) with a pasted job posting and shows a match report: score ruler, score breakdown, ranked edits, keywords to add, strengths and ATS formatting tips.
 
-## Features
-
-- ✨ **Modern, Clean UI** - Built with TailwindCSS for a polished SaaS look
-- 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
-- 📊 **Interactive Dashboard** - Real-time analysis results with visual breakdowns
-- 🎯 **Smart Empty State** - Engaging preview before the first upload
-- ⚡ **Fast & Lightweight** - Vite-powered for instant dev server and optimized builds
-- 🦾 **Type-Safe** - Full TypeScript support with proper interfaces
-
-## Tech Stack
-
-- **React 18** - UI framework
-- **Vite** - Next-generation build tool
-- **TypeScript** - Type safety
-- **TailwindCSS** - Utility-first styling
-- **Fetch API** - HTTP requests (no dependencies!)
-
-## Prerequisites
-
-- Node.js 16+ (npm or pnpm)
-- Backend API running on `http://localhost:8000`
-
-## Installation
-
-1. **Install dependencies:**
-
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
-
-2. **Create `.env` file (optional):**
-   ```bash
-   cp .env.example .env
-   ```
-   Customize `VITE_API_URL` if your backend is on a different URL. The default
-   `/api` value uses the Vite development proxy and the Vercel service rewrite.
-
-## Development
-
-Start the development server:
+## Run
 
 ```bash
-npm run dev
+npm install
+npm run dev            # http://localhost:5173, /api proxied to http://localhost:8000
 ```
 
-The app will be available at `http://localhost:5173` with hot module reloading.
-
-## Build for Production
+Start the backend first (see `../BE/README.md`). To point the proxy elsewhere:
 
 ```bash
-npm run build
+API_PROXY_TARGET=http://localhost:8011 npm run dev
 ```
 
-Output will be in the `dist/` folder.
+| Script | What it does |
+|---|---|
+| `npm run dev` | Dev server with the API proxy |
+| `npm run build` | Type check and production build to `dist/` |
+| `npm test` | Unit tests (vitest + jsdom) |
+| `npm run lint` | ESLint, zero warnings allowed |
+| `npm run typecheck` | `tsc --noEmit` |
 
-Preview the production build:
+`VITE_API_URL` sets the API base for builds (default `/api`, which the Vercel rewrite in `../vercel.json` serves).
 
-```bash
-npm run preview
-```
-
-## Project Structure
+## Structure
 
 ```
 src/
-├── components/           # Reusable React components
-│   ├── UploadForm.tsx           # File upload & job description input
-│   ├── ScoreOverview.tsx        # Current + Projected score cards
-│   ├── ScoreBreakdown.tsx       # Progress bars for 5 categories
-│   ├── StrengthList.tsx         # Resume strengths list
-│   ├── ImprovementsList.tsx     # Improvement suggestions
-│   ├── MissingKeywords.tsx      # Missing keywords tags
-│   ├── AtsTips.tsx              # ATS formatting tips
-│   ├── SummaryCard.tsx          # Overall summary
-│   ├── EmptyState.tsx           # Welcome screen
-│   └── index.ts                 # Component exports
-├── services/
-│   └── api.ts                  # API client (uploadAndAnalyzeResume)
-├── types/
-│   └── ats.ts                  # TypeScript interfaces
-├── App.tsx                     # Main application component
-├── main.tsx                    # React entry point
-└── index.css                   # TailwindCSS imports
+  App.tsx                 Picks the screen from the analysis state; keeps the draft between screens
+  app/                    App-wide concerns
+    analysisReducer.ts      idle → uploading → analyzing → done | failed (pure, tested)
+    useAnalysis.ts          Runs a comparison: upload progress, cancel, refresh-safe report
+    reportStorage.ts        Keeps the latest report in sessionStorage
+    useServiceHealth.ts     Backend health check
+    AppHeader / AppFooter / ServiceNotice
+  features/
+    intake/               Job posting + resume form, validation, upload/analysis progress
+    report/               Verdict, score ruler, breakdown, edit checklist, keywords, tips, print layout
+  services/
+    api.ts                  analyzeResume (XHR for upload progress, abortable), checkHealth
+    errors.ts               Error contract with the backend and the copy shown for each failure
+  ui/                     Button, Notice, Mark (highlighter)
+  types/ats.ts            Report shape returned by the backend
 ```
 
-## Components Overview
+Each feature exports its screen from `index.ts`. Pure logic (validation, formatting, score bands, edit grouping) lives in plain `.ts` modules next to its tests.
 
-### UploadForm
+## Error contract
 
-Handles resume file upload and job description input with validation.
+Failed requests return `{ "detail": string, "code": string }`. `services/errors.ts` maps each code to a message that says what happened and how to fix it. A server error without a `code` means something in front of the backend answered (proxy, gateway), and is shown as the analysis service being unreachable.
 
-**Props:**
+## Design system
 
-- `onAnalysisComplete` - Callback when analysis succeeds
-- `onLoading` - Callback for loading state
-- `onError` - Callback for errors
-- `loading` - Optional loading state
+Tokens live in `tailwind.config.js`; the default Tailwind palette is replaced.
 
-### ScoreOverview
+| Token | Hex | Use |
+|---|---|---|
+| `paper` | `#F7F8FA` | Page background |
+| `sheet` | `#FFFFFF` | Document surfaces |
+| `ink` | `#17203A` | Text, primary actions |
+| `graphite` | `#5B6478` | Secondary text |
+| `rule` | `#D9DDE5` | Borders |
+| `highlighter` | `#F2DF4A` | Only for things to add: missing keywords, the score gain |
+| `correction` | `#C8323C` | Problems, high-impact edits, errors |
+| `matched` | `#1F7A55` | Strengths, completed edits |
 
-Displays current ATS score and projected score with circular progress indicators.
-
-### ScoreBreakdownComponent
-
-Shows a breakdown of scores across 5 categories with progress bars.
-
-### StrengthList
-
-Lists resume strengths in a clean bullet-point style.
-
-### ImprovementsList
-
-Displays improvement suggestions with impact levels (high/medium/low).
-
-### MissingKeywords
-
-Shows missing keywords as interactive tags.
-
-### AtsTips
-
-Lists ATS-specific formatting recommendations.
-
-### SummaryCard
-
-Displays an overall summary of the analysis.
-
-### EmptyState
-
-Welcome screen with feature preview and mock results.
-
-## API Integration
-
-The frontend communicates with the backend's `/api/upload` endpoint:
-
-```typescript
-POST /api/upload
-Content-Type: multipart/form-data
-
-Body:
-- file: File (PDF or DOCX)
-- job_description: string
-```
-
-See [src/services/api.ts](src/services/api.ts) for implementation.
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env.local` file to override defaults:
-
-```env
-VITE_API_URL=/api
-```
-
-### TailwindCSS
-
-Customize colors and theme in [tailwind.config.js](tailwind.config.js).
-
-Current primary color: Sky blue (`#0284c7`)
-
-## Styling
-
-All styles use TailwindCSS utility classes. No custom CSS files needed for component styling.
-
-### Color Palette
-
-- **Primary**: Sky blue (`primary-600: #0284c7`)
-- **Success**: Green (`green-600: #16a34a`)
-- **Warning**: Yellow (`yellow-600: #ca8a04`)
-- **Error**: Red (`red-600: #dc2626`)
-- **Info**: Light blue (`blue-600: #2563eb`)
-
-## Performance
-
-- **Code Splitting**: Automatic with Vite
-- **Tree Shaking**: Unused code is removed in production
-- **CSS Purging**: TailwindCSS only includes used styles
-- **Image Optimization**: Consider using `vite-plugin-imagemin` for assets
-
-## Browser Support
-
-- Chrome/Edge (latest 2 versions)
-- Firefox (latest 2 versions)
-- Safari (latest 2 versions)
-
-## Troubleshooting
-
-### "Cannot connect to backend"
-
-Make sure the backend is running:
-
-```bash
-cd ../BE
-poetry run uvicorn src.main:app --reload
-```
-
-The frontend uses the Vite `/api` proxy, which expects the backend on
-`http://localhost:8000`.
-
-### Port 5173 already in use
-
-```bash
-npm run dev -- --port 3000
-```
-
-### Styles not loading
-
-Clear Vite cache:
-
-```bash
-rm -rf dist node_modules/.vite
-```
-
-## Development Tips
-
-- **HMR**: Hot Module Replacement is enabled. Changes instantly reload
-- **DevTools**: React DevTools extension is compatible
-- **Type Checking**: `tsc --noEmit` to check types without building
-- **Responsive Design**: Use DevTools device emulation to test mobile
-
-## Future Enhancements
-
-- [ ] Dark mode support
-- [ ] Resume preview/download
-- [ ] Analysis history
-- [ ] PDF visualization
-- [ ] Multiple language support
-- [ ] PWA capabilities
-
-## License
-
-Proprietary - SkillBridge AI
-
----
-
-**Made with** ❤️ **and** ☕ **by Vraj**
-
-**Questions?** Check the main [README.md](../README.md) for project-wide information.
+- Type: Schibsted Grotesk Variable (self-hosted via Fontsource), classical scale 12/14/16/18/21/24/36/48/60/72.
+- Icons: Phosphor (`@phosphor-icons/react`).
+- Radii encode hierarchy: 3px chips, 6px controls, 10px sheets. No shadows.
+- Motion: one moment, the score ruler drawing in on the report. Disabled under `prefers-reduced-motion`.

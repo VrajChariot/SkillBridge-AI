@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { AppFooter } from "./app/AppFooter";
 import { AppHeader } from "./app/AppHeader";
 import { ServiceNotice } from "./app/ServiceNotice";
 import { useAnalysis } from "./app/useAnalysis";
-import { IntakeScreen, emptyDraft, type IntakeDraft } from "./features/intake";
+import { useDraft } from "./app/useDraft";
+import { IntakeScreen } from "./features/intake";
 import { ReportScreen } from "./features/report";
 
 export default function App() {
   const { state, start, cancel, reset } = useAnalysis();
-  const [draft, setDraft] = useState<IntakeDraft>(emptyDraft);
+  const [draft, setDraft] = useDraft();
   const showReport = state.phase === "done";
   const main = useRef<HTMLElement>(null);
   const firstRender = useRef(true);

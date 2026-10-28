@@ -12,7 +12,7 @@ export function ReportToolbar({ fileName, onNewComparison }: ReportToolbarProps)
       <p className="min-w-0 break-words text-sm text-graphite">
         Compared <span className="font-medium text-ink">{fileName}</span> with the job posting
       </p>
-      <div className="flex gap-2" data-print="hide">
+      <div className="flex gap-2 whitespace-nowrap" data-print="hide">
         <Button variant="secondary" onClick={onNewComparison}>
           <ArrowCounterClockwise size={16} aria-hidden />
           New comparison

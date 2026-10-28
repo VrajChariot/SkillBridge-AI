@@ -12,14 +12,25 @@ describe("errorFromResponse", () => {
     expect(error.status).toBe(422);
   });
 
-  it("falls back to the status when the code is missing or unknown", () => {
+  it("falls back to the status when no backend code is present", () => {
     expect(errorFromResponse(413, {}).code).toBe("file_too_large");
-    expect(errorFromResponse(503, { code: "made_up" }).code).toBe("service_unavailable");
+    expect(errorFromResponse(504, "").code).toBe("timeout");
   });
 
-  it("treats unrecognised failures as unknown", () => {
-    expect(errorFromResponse(500, "<html>").code).toBe("unknown");
-    // FastAPI validation errors carry an array detail.
+  it("treats a codeless server error as the service being unreachable", () => {
+    // e.g. the dev proxy or hosting gateway answering because the backend is down.
+    expect(errorFromResponse(500, "").code).toBe("service_unavailable");
+    expect(errorFromResponse(502, "<html>Bad gateway</html>").code).toBe("service_unavailable");
+  });
+
+  it("keeps backend-reported failures as reported", () => {
+    expect(errorFromResponse(500, { code: "unknown", detail: "x" }).code).toBe("unknown");
+    expect(errorFromResponse(503, { code: "made_up" }).code).toBe("unknown");
+    expect(errorFromResponse(502, { code: "analysis_failed" }).code).toBe("analysis_failed");
+  });
+
+  it("treats unrecognised client errors as unknown", () => {
+    // FastAPI validation errors carry an array detail and no code.
     expect(errorFromResponse(422, { detail: [{ msg: "x" }] }).code).toBe("unknown");
   });
 });

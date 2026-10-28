@@ -24,11 +24,10 @@ const BACKEND_CODES = new Set<ErrorCode>([
   "service_unavailable",
 ]);
 
+/** Fallbacks for responses that didn't come from our backend (proxy, gateway, platform limits). */
 const STATUS_CODES: Record<number, ErrorCode> = {
   413: "file_too_large",
   415: "unsupported_file_type",
-  502: "analysis_failed",
-  503: "service_unavailable",
   504: "timeout",
 };
 
@@ -47,11 +46,20 @@ export class ApiError extends Error {
 /** Builds an ApiError from a failed HTTP response. */
 export function errorFromResponse(status: number, body: unknown): ApiError {
   const { code, detail } = readErrorBody(body);
-  const resolved: ErrorCode =
-    code && BACKEND_CODES.has(code as ErrorCode)
-      ? (code as ErrorCode)
-      : (STATUS_CODES[status] ?? "unknown");
-  return new ApiError(resolved, detail ?? `Request failed with status ${status}`, status);
+  return new ApiError(
+    resolveCode(status, code),
+    detail ?? `Request failed with status ${status}`,
+    status,
+  );
+}
+
+function resolveCode(status: number, code: string | undefined): ErrorCode {
+  // Our backend always sends a code; trust it, even when it's one we don't know yet.
+  if (code !== undefined) {
+    return BACKEND_CODES.has(code as ErrorCode) ? (code as ErrorCode) : "unknown";
+  }
+  // No code: something in front of the backend answered, e.g. the backend is down.
+  return STATUS_CODES[status] ?? (status >= 500 ? "service_unavailable" : "unknown");
 }
 
 function readErrorBody(body: unknown): { code?: string; detail?: string } {

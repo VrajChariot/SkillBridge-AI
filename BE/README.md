@@ -8,7 +8,7 @@ The backend service is a FastAPI application that provides intelligent resume pa
 
 ## Features
 
-- ✅ **PDF and DOCX Resume Upload**: Up to 10 MB, with automatic text extraction
+- ✅ **PDF and DOCX Resume Upload**: Up to 4.5 MB (Vercel's request body limit), with automatic text extraction
 - ✅ **AI Resume Analysis**: Uses Google Gemini 3 Flash with deep reasoning capabilities
 - ✅ **Comprehensive Scoring**: Multi-dimensional analysis including:
   - Overall match score (0-100)
@@ -117,7 +117,7 @@ Analyzes a resume against a job description using AI.
 
 **Parameters:**
 
-- `file` (form-data, required): PDF or DOCX resume, at most 10 MB
+- `file` (form-data, required): PDF or DOCX resume, at most 4.5 MB
 - `job_description` (form-data, required): Job posting text, at most 20,000 characters after trimming whitespace
 
 **Example Request:**
@@ -183,7 +183,7 @@ Every error response has the body `{"detail": "<human readable>", "code": "<code
 
 | code                       | status | when                                                                       |
 | -------------------------- | ------ | -------------------------------------------------------------------------- |
-| `file_too_large`           | 413    | Resume is larger than 10 MB                                                |
+| `file_too_large`           | 413    | Resume is larger than 4.5 MB                                               |
 | `unsupported_file_type`    | 415    | Resume is not PDF or DOCX (by content type or extension)                   |
 | `resume_unreadable`        | 422    | No file attached, empty file, corrupt or password-protected file, or no extractable text |
 | `job_description_missing`  | 422    | `job_description` is missing or only whitespace                            |
@@ -286,7 +286,7 @@ python -m pytest
 **Solution:** read the `code` in the error body (see the error table above).
 
 1. `unsupported_file_type`: upload a PDF or DOCX
-2. `file_too_large`: the limit is 10 MB
+2. `file_too_large`: the limit is 4.5 MB
 3. `resume_unreadable`: the file is empty, damaged, password protected, or a scanned image with no text; export a text-based PDF or DOCX
 4. Verify `python-multipart` is installed: `poetry show | grep multipart`
 

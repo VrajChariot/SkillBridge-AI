@@ -17,7 +17,8 @@ from src.schemas import AtsReport
 
 load_dotenv()
 
-MAX_RESUME_BYTES = 10 * 1024 * 1024
+# Vercel functions reject request bodies over 4.5 MB, so the resume can't be larger.
+MAX_RESUME_BYTES = int(4.5 * 1024 * 1024)
 MAX_JOB_DESCRIPTION_CHARS = 20_000
 
 app = FastAPI()
@@ -59,7 +60,7 @@ def _read_resume(file: UploadFile) -> bytes:
         raise AppError(
             ErrorCode.FILE_TOO_LARGE,
             413,
-            "The resume is larger than 10 MB. Export a smaller PDF or DOCX and try again.",
+            "The resume is larger than 4.5 MB. Export a smaller PDF or DOCX and try again.",
         )
     return data
 

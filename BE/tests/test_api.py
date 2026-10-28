@@ -64,13 +64,13 @@ def test_docx_resumes_are_analyzed(client, gemini):
     assert upload(client, file=file).status_code == 200
 
 
-def test_file_over_10_mb_is_too_large(client):
+def test_file_over_the_limit_is_too_large(client):
     file = ("resume.pdf", b"0" * (MAX_RESUME_BYTES + 1), "application/pdf")
 
     assert_error(upload(client, file=file), 413, "file_too_large")
 
 
-def test_file_of_exactly_10_mb_is_accepted_for_reading(client):
+def test_file_exactly_at_the_limit_is_accepted_for_reading(client):
     file = ("resume.pdf", b"0" * MAX_RESUME_BYTES, "application/pdf")
 
     assert_error(upload(client, file=file), 422, "resume_unreadable")
